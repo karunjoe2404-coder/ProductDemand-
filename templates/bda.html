@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Product Demand Prediction</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: linear-gradient(135deg, #0a1628 0%, #0d2149 50%, #1a3a6b 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .header .icon { font-size: 40px; margin-bottom: 10px; }
+    .header h1 {
+      font-size: 26px;
+      font-weight: 700;
+      color: #ffffff;
+    }
+    .header p {
+      font-size: 14px;
+      color: rgba(255,255,255,0.6);
+      margin-top: 4px;
+    }
+
+    /* Cards wrapper */
+    .wrapper {
+      display: flex;
+      gap: 20px;
+      width: 100%;
+      max-width: 680px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 28px 24px;
+      flex: 1;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+    }
+
+    .card-title {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: #a0a3b1;
+      margin-bottom: 20px;
+    }
+
+    /* Form */
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: #4a4a6a;
+      margin-bottom: 7px;
+    }
+
+    .select-wrap { position: relative; margin-bottom: 18px; }
+    .select-wrap::after {
+      content: '▾';
+      position: absolute;
+      right: 13px; top: 50%;
+      transform: translateY(-50%);
+      color: #5c6bc0;
+      pointer-events: none;
+      font-size: 13px;
+    }
+
+    select {
+      width: 100%;
+      appearance: none;
+      padding: 11px 36px 11px 13px;
+      border: 1.5px solid #e4e6f0;
+      border-radius: 10px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 14px;
+      color: #1e1e2e;
+      background: white;
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    select:focus { border-color: #5c6bc0; }
+
+    /* Season pills */
+    .pills {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 22px;
+    }
+    .pill {
+      flex: 1;
+      text-align: center;
+      padding: 9px 6px;
+      border-radius: 9px;
+      font-size: 12px;
+      font-weight: 500;
+      color: #8b8fa8;
+      border: 1.5px solid #e4e6f0;
+      cursor: pointer;
+      transition: all 0.2s;
+      user-select: none;
+    }
+    .pill span { display: block; font-size: 18px; margin-bottom: 3px; }
+    .pill:hover { border-color: #5c6bc0; color: #5c6bc0; }
+    .pill.active {
+      border-color: #5c6bc0;
+      background: #eef0fd;
+      color: #3d4db7;
+      font-weight: 600;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #5c6bc0;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+    button:hover { background: #4a58b0; transform: translateY(-1px); }
+    button:active { transform: translateY(0); }
+
+    /* Result card */
+    .result-card {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .result-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      min-height: 180px;
+    }
+
+    .empty-icon { font-size: 36px; opacity: 0.25; margin-bottom: 10px; }
+    .empty-text { font-size: 13px; color: #b0b3c6; line-height: 1.6; }
+
+    .result-icon { font-size: 40px; margin-bottom: 12px; }
+    .result-sublabel {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: #a0a3b1;
+      margin-bottom: 14px;
+    }
+
+    .product-list { width: 100%; display: flex; flex-direction: column; gap: 8px; }
+    .product-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #f7f8ff;
+      border-radius: 9px;
+      padding: 10px 14px;
+      text-align: left;
+      animation: fadeIn 0.3s ease both;
+    }
+    .product-row:nth-child(2) { animation-delay: 0.06s; }
+    .product-row:nth-child(3) { animation-delay: 0.12s; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .product-num {
+      font-size: 11px;
+      font-weight: 600;
+      color: #5c6bc0;
+      background: #e8eaf6;
+      border-radius: 5px;
+      padding: 2px 7px;
+      flex-shrink: 0;
+    }
+    .product-name { font-size: 13px; font-weight: 500; color: #2e2e4e; }
+
+    .result-plain {
+      font-size: 15px;
+      font-weight: 500;
+      color: #3d4db7;
+      line-height: 1.8;
+      white-space: pre-line;
+    }
+
+    @media (max-width: 600px) {
+      .wrapper { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="icon">📦</div>
+    <h1>Product Demand Prediction</h1>
+    <p>Select region &amp; season to forecast demand</p>
+  </div>
+
+  <div class="wrapper">
+
+    <!-- Input Card -->
+    <div class="card">
+      <div class="card-title">Enter Details</div>
+
+      <form action="/predict" method="post">
+
+        <label>Country</label>
+        <div class="select-wrap">
+          <select name="country" required>
+            <option value="">Select Country</option>
+            {% for c in countries %}
+            <option value="{{c}}">{{c}}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <label>Season</label>
+        <input type="hidden" name="season" id="season-val" value="Summer">
+        <div class="pills">
+          <div class="pill active" data-val="Summer" onclick="setSeason(this)">
+            <span>☀️</span>Summer
+          </div>
+          <div class="pill" data-val="Monsoon" onclick="setSeason(this)">
+            <span>🌧️</span>Monsoon
+          </div>
+          <div class="pill" data-val="Winter" onclick="setSeason(this)">
+            <span>❄️</span>Winter
+          </div>
+        </div>
+
+        <button type="submit">Predict Products</button>
+
+      </form>
+    </div>
+
+    <!-- Result Card -->
+    <div class="card result-card">
+      <div class="card-title">Prediction Result</div>
+
+      <div class="result-body">
+        {% if prediction_text %}
+          <div class="result-icon">📈</div>
+          <div class="result-sublabel">Predicted Products</div>
+
+          {% set lines = prediction_text.split('\n') if '\n' in prediction_text else [prediction_text] %}
+          {% if lines | length > 1 %}
+            <div class="product-list">
+              {% for line in lines %}
+                {% if line.strip() %}
+                <div class="product-row">
+                  <span class="product-num">{{ loop.index }}</span>
+                  <span class="product-name">{{ line.strip() }}</span>
+                </div>
+                {% endif %}
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="result-plain">{{ prediction_text }}</div>
+          {% endif %}
+
+        {% else %}
+          <div class="empty-icon">📊</div>
+          <div class="empty-text">Submit the form to<br>see prediction here</div>
+        {% endif %}
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    function setSeason(el) {
+      document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+      el.classList.add('active');
+      document.getElementById('season-val').value = el.dataset.val;
+    }
+  </script>
+
+</body>
+</html>
